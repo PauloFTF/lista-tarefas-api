@@ -14,8 +14,9 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    // Esta é a chave secreta para assinar o token. Em produção, isso ficaria numa variável de ambiente.
-    private String secret = "minha-chave-secreta-super-segura";
+    /// O @Value lê do application.properties (ou application-prod.properties)
+    @Value("${api.security.token.secret}")
+    private String secret;
 
     public String gerarToken(Usuario usuario){
         try {
