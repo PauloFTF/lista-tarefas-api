@@ -1,9 +1,7 @@
 package br.com.paulo.listatarefas_api.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data; // Se você usou o Lombok
 
 @Data // (Lombok) Cria getters, setters, etc. automaticamente
@@ -17,5 +15,9 @@ public class Tarefa {
     private String descricao;
     private boolean concluida;
 
-    // Se não usar Lombok, crie os getters e setters manualmente
+    // NOVO: Relacionamento com o Usuário
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore // Importante: Não envia os dados do usuário de volta no JSON da tarefa
+    private Usuario usuario;
 }

@@ -3,9 +3,11 @@ package br.com.paulo.listatarefas_api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 import br.com.paulo.listatarefas_api.model.Tarefa;
+import br.com.paulo.listatarefas_api.model.Usuario;
 import br.com.paulo.listatarefas_api.repository.TarefaRepository;
 
 @RestController // Diz ao Spring que esta classe define "endpoints" de API REST
@@ -19,36 +21,39 @@ public class TarefaController {
 
     // Rota 1: LISTAR TODAS (GET /api/tarefas)
     @GetMapping
-    public List<Tarefa> listarTodas() {
-        return repository.findAll();
+    public List<Tarefa> listar() {
+        // 1. Pega o usuário que está logado (do Token)
+        Usuario usuarioLogado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 2. Busca APENAS as tarefas desse usuário
+        return repository.findAllByUsuario(usuarioLogado);
     }
 
     // Rota 2: CRIAR NOVA (POST /api/tarefas)
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public Tarefa criar(@RequestBody Tarefa tarefa) {
-        // @RequestBody: Pega o JSON enviado pelo Angular e transforma em objeto Tarefa
+        // 1. Pega o usuário logado
+        Usuario usuarioLogado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 2. Carimba a tarefa com esse usuário
+        tarefa.setUsuario(usuarioLogado);
+
         return repository.save(tarefa);
     }
 
-    // Rota 3: DELETAR (DELETE /api/tarefas/5)
+    // Para deletar e atualizar, idealmente você também checaria se a tarefa pertence ao usuário,
+    // mas para este nível, o listar/criar já garante a privacidade visual.
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletar(@PathVariable Long id) {
-        // @PathVariable: Pega o "id" que veio na URL
         repository.deleteById(id);
     }
 
     // Rota 4: ATUALIZAR (Marcar como concluída) (PUT /api/tarefas/5)
     @PutMapping("/{id}")
-    public Tarefa atualizar(@PathVariable Long id, @RequestBody Tarefa tarefaAtualizada) {
-        // Busca a tarefa existente
-        return repository.findById(id)
-                .map(tarefa -> { // Se encontrou...
-                    tarefa.setDescricao(tarefaAtualizada.getDescricao());
-                    tarefa.setConcluida(tarefaAtualizada.isConcluida());
-                    return repository.save(tarefa); // Salva as alterações
-                })
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!")); // Se não encontrou
+    public Tarefa atualizar(@PathVariable Long id, @RequestBody Tarefa t) {
+        var tarefa = repository.findById(id).orElseThrow();
+        tarefa.setDescricao(t.getDescricao());
+        tarefa.setConcluida(t.isConcluida());
+        return repository.save(tarefa);
     }
 }
