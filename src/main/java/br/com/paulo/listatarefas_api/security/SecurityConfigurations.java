@@ -48,7 +48,7 @@ public class SecurityConfigurations {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Libera o Angular
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://lista-tarefas-ui.vercel.app")); // Libera o Angular
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Libera os métodos
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Libera o cabeçalho do token
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
