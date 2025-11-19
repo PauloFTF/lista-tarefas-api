@@ -1,3 +1,4 @@
 package br.com.paulo.listatarefas_api.dto;
 
-public record LoginResponseDTO(String token) {}
+// Agora retornamos o Token E o Nome
+public record LoginResponseDTO(String token, String nome) {}
